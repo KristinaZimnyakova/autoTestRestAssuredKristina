@@ -1,20 +1,28 @@
+package services;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import models.User;
 import org.junit.jupiter.api.Assertions;
 
+
 public class LoginService {
-    static final String URL = "https://restful-booker.herokuapp.com/auth";
+    public static final String URL = "https://restful-booker.herokuapp.com";
 
     static RequestSpecification session = null;
 
     public static RequestSpecification get(){
+        RestAssured.baseURI = URL;
         if(session == null) {
             User user = User.builder().username("admin").password("password123").build();
             String token = RestAssured.given().contentType(ContentType.JSON).body(user)
-                    .when().log().all().post(URL)
+                    .when().log().all().post("/auth")
                     .then().log().all().statusCode(200).extract().body().jsonPath().get("token");
-            return RestAssured.given().header("token", token);
+            return RestAssured.given()
+                    .cookie("token", token)
+                    .header("Accept", "application/json")
+                    .header("Content-Type", "application/json");
         }
         return session;
     }
