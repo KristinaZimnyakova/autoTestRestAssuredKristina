@@ -17,12 +17,13 @@ public class LoginService {
         if(session == null) {
             User user = User.builder().username("admin").password("password123").build();
             String token = RestAssured.given().contentType(ContentType.JSON).body(user)
-                    .when().log().all().post("/auth")
-                    .then().log().all().statusCode(200).extract().body().jsonPath().get("token");
-            return RestAssured.given()
+                    .when().log().ifValidationFails().post("/auth")
+                    .then().log().ifValidationFails().statusCode(200).extract().body().jsonPath().get("token");
+            session = RestAssured.given()
                     .cookie("token", token)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json");
+            return session;
         }
         return session;
     }
