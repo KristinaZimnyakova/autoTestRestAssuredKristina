@@ -1,19 +1,23 @@
 package tests;
 
-import bookingMethods.CreateBooking;
+import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import models.Booking;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import services.LoginService;
+import services.ManageBooking;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static bookingMethods.BookingGenerator.bookingGenerator;
+import static dataMethods.BookingGenerator.bookingGenerator;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DDTests {
 
@@ -25,28 +29,34 @@ public class DDTests {
         session = LoginService.get();
     }
 
+    @AfterEach
+    public void deleteBooking(){
+        ManageBooking.deleteBooking(session, bookingid);
+        System.out.println("удалено бронирование " + bookingid);
+    }
+
     @ParameterizedTest
     @MethodSource("bookingSource")
     public void createBookingParameterizedTest(Booking booking){
-        bookingid = CreateBooking.createBooking(session, booking);
+        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
+        bookingid = bookingBody.jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
+        Assertions.assertEquals(bookingBody.path("booking.firstname"), booking.getFirstname());
+        Assertions.assertEquals(bookingBody.path("booking.lastname"), booking.getLastname());
+        Assertions.assertEquals(bookingBody.path("booking.totalprice"), booking.getTotalprice());
+        Assertions.assertEquals(bookingBody.path("booking.depositpaid"), booking.getDepositpaid());
+        Assertions.assertEquals(bookingBody.path("booking.additionalneeds"), booking.getAdditionalneeds());
+        Assertions.assertEquals(bookingBody.path("booking.bookingdates.checkin"), booking.getBookingdates().getCheckin());
+        Assertions.assertEquals(bookingBody.path("booking.bookingdates.checkout"), booking.getBookingdates().getCheckout());
     }
 
     public static Stream<Arguments> bookingSource(){
-        List<Booking> bookingList = bookingGenerator(5);
-        //bookingList.stream().forEach(i -> {System.out.println("Имя " + i.getFirstname() + " Фамилия: " + i.getLastname());});
-        Booking booking1 = bookingList.get(0);
-        Booking booking2 = bookingList.get(1);
-        Booking booking3 = bookingList.get(2);
-        Booking booking4 = bookingList.get(3);
-        Booking booking5 = bookingList.get(4);
-        return Stream.of(
-                Arguments.of(booking1),
-                Arguments.of(booking2),
-                Arguments.of(booking3),
-                Arguments.of(booking4),
-                Arguments.of(booking5)
-        );
+        List<Booking> bookingList = bookingGenerator(4);
+        List<Arguments> argumentsList = new ArrayList<>();
+        for (Booking i:bookingList) {
+            argumentsList.add(Arguments.of(i));
+        }
+        return argumentsList.stream();
     }
 
 }

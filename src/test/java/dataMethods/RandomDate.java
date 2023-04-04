@@ -1,4 +1,4 @@
-package bookingMethods;
+package dataMethods;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

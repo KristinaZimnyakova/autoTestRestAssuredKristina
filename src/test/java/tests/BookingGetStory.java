@@ -1,21 +1,25 @@
 package tests;
 
-import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
-import models.Booking;
 import io.restassured.specification.RequestSpecification;
+import models.Booking;
 import org.junit.jupiter.api.*;
 import services.LoginService;
 import services.ManageBooking;
 
 import java.util.List;
+
 import static dataMethods.BookingGenerator.bookingGenerator;
+import static org.hamcrest.Matchers.equalTo;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class BookingUpdateStory {
+public class BookingGetStory {
 
     RequestSpecification session;
     Integer bookingid;
+    List<Booking> bookingList = bookingGenerator(1);
+    Booking booking = bookingList.get(0);
 
     @BeforeAll
     public void setUpSession(){
@@ -24,24 +28,21 @@ public class BookingUpdateStory {
 
     @BeforeEach
     public void createBooking(){
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
         ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
         bookingid = bookingBody.jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
     }
+
     @AfterEach
-    //можно заменить удалением, если нужно "не засорять" БД
-    public void setNullBookingId(){
-        bookingid = null;
+    public void deleteBooking(){
+        ManageBooking.deleteBooking(session, bookingid);
+        System.out.println("удалено бронирование " + bookingid);
     }
 
     @Test
-    public void updateBookingWithValidation(){
-        RestAssured.baseURI = LoginService.URL;
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
-        ResponseBody bookingBody = ManageBooking.updateBooking(session, booking, bookingid);
+    //сравнение атрибутов бронирования из get запроса с атрибутами сгенерированного бронирования
+    public void getBookingWithValidation(){
+        ResponseBody bookingBody = ManageBooking.getBooking(session, bookingid);
         Assertions.assertEquals(bookingBody.path("firstname"), booking.getFirstname());
         Assertions.assertEquals(bookingBody.path("lastname"), booking.getLastname());
         Assertions.assertEquals(bookingBody.path("totalprice"), booking.getTotalprice());
@@ -49,9 +50,7 @@ public class BookingUpdateStory {
         Assertions.assertEquals(bookingBody.path("additionalneeds"), booking.getAdditionalneeds());
         Assertions.assertEquals(bookingBody.path("bookingdates.checkin"), booking.getBookingdates().getCheckin());
         Assertions.assertEquals(bookingBody.path("bookingdates.checkout"), booking.getBookingdates().getCheckout());
-        System.out.println("отредактировано бронирование " + bookingid);
     }
-
 
 
 }

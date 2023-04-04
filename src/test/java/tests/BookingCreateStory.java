@@ -1,14 +1,16 @@
 package tests;
 
-import bookingMethods.CreateBooking;
-import bookingMethods.DeleteBooking;
 import io.restassured.RestAssured;
+import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import models.Booking;
 import org.junit.jupiter.api.*;
 import services.LoginService;
+import services.ManageBooking;
+
+import java.util.ArrayList;
 import java.util.List;
-import static bookingMethods.BookingGenerator.bookingGenerator;
+import static dataMethods.BookingGenerator.bookingGenerator;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BookingCreateStory {
@@ -23,11 +25,12 @@ public class BookingCreateStory {
 
     @AfterEach
     public void deleteBooking(){
-        DeleteBooking.deleteBooking(session, bookingid);
+        ManageBooking.deleteBooking(session, bookingid);
         System.out.println("удалено бронирование " + bookingid);
     }
 
     @AfterAll
+    //чтобы попробовать использование анотации - get запрос для последнего присвоенного значения bookingid
     public void getBooking(){
         RestAssured.baseURI = LoginService.URL;
         String response = session.when().get("/booking/" + bookingid)
@@ -39,20 +42,25 @@ public class BookingCreateStory {
     public void createBooking(){
         List<Booking> bookingList = bookingGenerator(1);
         Booking booking = bookingList.get(0);
-        bookingid = CreateBooking.createBooking(session, booking);
+        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
+        bookingid = bookingBody.jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
     }
 
     @Test
-    public void createBooking2(){
+    public void createBookingWithValidation(){
         List<Booking> bookingList = bookingGenerator(1);
         Booking booking = bookingList.get(0);
-        bookingid = CreateBooking.createBooking(session, booking);
+        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
+        bookingid = bookingBody.jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
+        Assertions.assertEquals(bookingBody.path("booking.firstname"), booking.getFirstname());
+        Assertions.assertEquals(bookingBody.path("booking.lastname"), booking.getLastname());
+        Assertions.assertEquals(bookingBody.path("booking.totalprice"), booking.getTotalprice());
+        Assertions.assertEquals(bookingBody.path("booking.depositpaid"), booking.getDepositpaid());
+        Assertions.assertEquals(bookingBody.path("booking.additionalneeds"), booking.getAdditionalneeds());
+        Assertions.assertEquals(bookingBody.path("booking.bookingdates.checkin"), booking.getBookingdates().getCheckin());
+        Assertions.assertEquals(bookingBody.path("booking.bookingdates.checkout"), booking.getBookingdates().getCheckout());
     }
-
-
-
-
 
 }

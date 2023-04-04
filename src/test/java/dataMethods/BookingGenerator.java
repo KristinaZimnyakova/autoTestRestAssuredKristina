@@ -1,11 +1,11 @@
-package bookingMethods;
+package dataMethods;
 
 import models.Booking;
 import models.Bookingdates;
 import java.util.ArrayList;
 import java.util.List;
-import static bookingMethods.FileWork.randomName;
-import static bookingMethods.RandomDate.*;
+import static dataMethods.FileWork.randomName;
+import static dataMethods.RandomDate.*;
 
 public class BookingGenerator {
 

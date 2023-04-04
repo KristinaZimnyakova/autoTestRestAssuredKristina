@@ -1,4 +1,4 @@
-package bookingMethods;
+package dataMethods;
 
 import java.io.IOException;
 import java.nio.file.Files;
