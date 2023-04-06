@@ -23,8 +23,7 @@ public class BookingCreateFailStory {
     @Test
     //—оздание бронировани€ с невалидными данными
     public void createFailBooking(){
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
+        Booking booking = bookingGenerator(1).get(0);
         booking.setDepositpaid(null);
         RestAssured.baseURI = LoginService.URL;
         session.body(booking)

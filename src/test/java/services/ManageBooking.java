@@ -8,42 +8,39 @@ import models.Booking;
 
 public class ManageBooking {
 
-    public static ResponseBody createBooking(RequestSpecification session, Booking booking){
+    public static ResponseBody createBooking(Booking booking){
         RestAssured.baseURI = LoginService.URL;
-        ResponseBody bookingBody = (Response) session.body(booking)
+        return (Response) LoginService.get().body(booking)
                 .when().log().ifValidationFails().post("/booking")
                 .then().log().ifValidationFails().statusCode(200).extract().body();
-        return bookingBody;
     }
 
-    public static void deleteBooking(RequestSpecification session, Integer bookingid){
-            RestAssured.baseURI = LoginService.URL;
-            session.when().log().ifValidationFails().delete("/booking/" + bookingid)
-                    .then().statusCode(201);
-    }
-
-    public static ResponseBody updateBooking(RequestSpecification session, Booking booking, Integer bookingid){
+    public static void deleteBooking(Integer bookingid){
         RestAssured.baseURI = LoginService.URL;
-        ResponseBody bookingBody = (Response) session.body(booking)
-                .when().log().ifValidationFails().put("/booking/" + bookingid)
+        LoginService.get().when().pathParam("id", bookingid).log().ifValidationFails().delete("/booking/{id}")
+                .then().statusCode(201);
+
+    }
+
+    public static ResponseBody updateBooking(Booking booking, Integer bookingid){
+        RestAssured.baseURI = LoginService.URL;
+        return (Response) LoginService.get().body(booking)
+                .when().log().ifValidationFails().pathParam("id", bookingid).put("/booking/{id}")
                 .then().log().ifValidationFails().statusCode(200).extract().body();
-        return bookingBody;
     }
 
-    public static ResponseBody getBooking(RequestSpecification session, Integer bookingid){
+    public static ResponseBody getBooking(Integer bookingid){
         RestAssured.baseURI = LoginService.URL;
-        ResponseBody bookingBody =  (Response) session
-                .when().log().ifValidationFails().get("/booking/" + bookingid)
+        return (Response) LoginService.get()
+                .when().log().ifValidationFails().pathParam("id", bookingid).get("/booking/{id}")
                 .then().log().ifValidationFails().statusCode(200).extract().body();
-        return bookingBody;
     }
 
-    public static ResponseBody getAllBookings(RequestSpecification session){
+    public static ResponseBody getAllBookings(){
         RestAssured.baseURI = LoginService.URL;
-        ResponseBody bookingBody =  (Response) session
+        return (Response) LoginService.get()
                 .when().log().ifValidationFails().get("/booking")
                 .then().log().ifValidationFails().statusCode(200).extract().body();
-        return bookingBody;
     }
 
 }

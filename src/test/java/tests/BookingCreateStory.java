@@ -8,8 +8,6 @@ import org.junit.jupiter.api.*;
 import services.LoginService;
 import services.ManageBooking;
 
-import java.util.ArrayList;
-import java.util.List;
 import static dataMethods.BookingGenerator.bookingGenerator;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -25,7 +23,7 @@ public class BookingCreateStory {
 
     @AfterEach
     public void deleteBooking(){
-        ManageBooking.deleteBooking(session, bookingid);
+        ManageBooking.deleteBooking(bookingid);
         System.out.println("удалено бронирование " + bookingid);
     }
 
@@ -33,25 +31,21 @@ public class BookingCreateStory {
     //чтобы попробовать использование анотации - get запрос для последнего присвоенного значения bookingid
     public void getBooking(){
         RestAssured.baseURI = LoginService.URL;
-        String response = session.when().get("/booking/" + bookingid)
+        String response = session.when().pathParam("id", bookingid).log().ifValidationFails().get("/booking/{id}")
                 .then().statusCode(404).extract().body().asString();
         Assertions.assertEquals("Not Found", response);
     }
 
     @Test
     public void createBooking(){
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
-        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
-        bookingid = bookingBody.jsonPath().get("bookingid");
+        bookingid = ManageBooking.createBooking(bookingGenerator(1).get(0)).jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
     }
 
     @Test
     public void createBookingWithValidation(){
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
-        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
+        Booking booking = bookingGenerator(1).get(0);
+        ResponseBody bookingBody = ManageBooking.createBooking(booking);
         bookingid = bookingBody.jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
         Assertions.assertEquals(bookingBody.path("booking.firstname"), booking.getFirstname());

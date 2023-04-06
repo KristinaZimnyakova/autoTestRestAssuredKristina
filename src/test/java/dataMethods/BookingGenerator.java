@@ -17,10 +17,14 @@ public static List<Booking> bookingGenerator(Integer number){
 
     List<Booking> bookingList = new ArrayList<>();
     for (int i=0; i<number; i++) {
-        Bookingdates bookingdates = Bookingdates.builder().checkin(randomeBookingDate()).checkout(randomeBookingDate()).build();
         Booking booking = Booking.builder()
-                .firstname(randomName(firstname)).lastname(randomName(lastname)).totalprice(totalPriceGeneratior())
-                .depositpaid(depositpaid()).bookingdates(bookingdates).additionalneeds(randomName(additionalneeds())).build();
+                .firstname(randomName(firstname))
+                .lastname(randomName(lastname))
+                .totalprice(Math.toIntExact(RandomDate.randomBetween(1000, 999999)))
+                .depositpaid(getRandomBoolean())
+                .bookingdates(Bookingdates.getRandom())
+                .additionalneeds(randomName(additionalneeds()))
+                .build();
         bookingList.add(booking);
     }
     return bookingList;

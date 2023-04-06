@@ -25,12 +25,9 @@ public class BookingDeleteFailStory {
 
     @BeforeEach
     public void createBooking(){
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
-        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
-        bookingid = bookingBody.jsonPath().get("bookingid");
+        bookingid = ManageBooking.createBooking(bookingGenerator(1).get(0)).jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
-        ManageBooking.deleteBooking(session, bookingid);
+        ManageBooking.deleteBooking(bookingid);
         System.out.println("удалено бронирование " + bookingid);
     }
 

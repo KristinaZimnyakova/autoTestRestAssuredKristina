@@ -31,14 +31,14 @@ public class DDTests {
 
     @AfterEach
     public void deleteBooking(){
-        ManageBooking.deleteBooking(session, bookingid);
+        ManageBooking.deleteBooking(bookingid);
         System.out.println("удалено бронирование " + bookingid);
     }
 
     @ParameterizedTest
     @MethodSource("bookingSource")
     public void createBookingParameterizedTest(Booking booking){
-        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
+        ResponseBody bookingBody = ManageBooking.createBooking(booking);
         bookingid = bookingBody.jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
         Assertions.assertEquals(bookingBody.path("booking.firstname"), booking.getFirstname());

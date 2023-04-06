@@ -8,7 +8,6 @@ import org.junit.jupiter.api.*;
 import services.LoginService;
 import services.ManageBooking;
 
-import java.util.List;
 import static dataMethods.BookingGenerator.bookingGenerator;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -24,10 +23,7 @@ public class BookingUpdateStory {
 
     @BeforeEach
     public void createBooking(){
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
-        ResponseBody bookingBody = ManageBooking.createBooking(session, booking);
-        bookingid = bookingBody.jsonPath().get("bookingid");
+        bookingid = ManageBooking.createBooking(bookingGenerator(1).get(0)).jsonPath().get("bookingid");
         System.out.println("создано бронирование " + bookingid);
     }
     @AfterEach
@@ -39,9 +35,8 @@ public class BookingUpdateStory {
     @Test
     public void updateBookingWithValidation(){
         RestAssured.baseURI = LoginService.URL;
-        List<Booking> bookingList = bookingGenerator(1);
-        Booking booking = bookingList.get(0);
-        ResponseBody bookingBody = ManageBooking.updateBooking(session, booking, bookingid);
+        Booking booking = bookingGenerator(1).get(0);
+        ResponseBody bookingBody = ManageBooking.updateBooking(booking, bookingid);
         Assertions.assertEquals(bookingBody.path("firstname"), booking.getFirstname());
         Assertions.assertEquals(bookingBody.path("lastname"), booking.getLastname());
         Assertions.assertEquals(bookingBody.path("totalprice"), booking.getTotalprice());
