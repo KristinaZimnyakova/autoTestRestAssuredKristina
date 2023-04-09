@@ -7,6 +7,7 @@ import models.ResponseBookingDto;
 import org.junit.jupiter.api.*;
 import services.LoginService;
 import services.ManageBooking;
+import steps.BookingSteps;
 
 import static dataMethods.BookingGenerator.bookingGenerator;
 
@@ -27,7 +28,7 @@ public class BookingStory {
     @DisplayName("Создание бронирования")
     public void createBooking(){
         booking = bookingGenerator(1).get(0);
-        responseBookingDto = ManageBooking.createBooking(booking);
+        responseBookingDto = BookingSteps.createBooking(booking);
     }
     @AfterEach
     @DisplayName("Удаление бронирования")
