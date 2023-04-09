@@ -4,14 +4,17 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import models.User;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import services.LoginService;
 
 import static org.hamcrest.Matchers.equalTo;
 
+@DisplayName("Тесты авторизации")
 public class FirstTest {
 
     @Test
+    @DisplayName("Успешная авторизация")
     public void login(){
         RestAssured.baseURI = LoginService.URL;
         User user = User.builder().username("admin").password("password123").build();
@@ -21,6 +24,7 @@ public class FirstTest {
         Assertions.assertNotNull(token);
     }
     @Test
+    @DisplayName("Авторизация с невалидными кредами")
     public void failLogin(){
         RestAssured.baseURI = LoginService.URL;
         User user = User.builder().username("admin").password("123").build();

@@ -11,6 +11,7 @@ import java.util.List;
 import static dataMethods.BookingGenerator.bookingGenerator;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("Неуспешное создание бронирования")
 public class BookingCreateFailStory {
 
     RequestSpecification session;
@@ -21,7 +22,7 @@ public class BookingCreateFailStory {
     }
 
     @Test
-    //Создание бронирования с невалидными данными
+    @DisplayName("Создание бронирования с невалидными данными")
     public void createFailBooking(){
         Booking booking = bookingGenerator(1).get(0);
         booking.setDepositpaid(null);

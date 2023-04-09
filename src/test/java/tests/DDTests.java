@@ -1,12 +1,9 @@
 package tests;
 
-import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import models.Booking;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
+import models.ResponseBookingDto;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,7 +19,8 @@ import static dataMethods.BookingGenerator.bookingGenerator;
 public class DDTests {
 
     RequestSpecification session;
-    Integer bookingid;
+    ResponseBookingDto responseBookingDto;
+    Booking bookingCreate;
 
     @BeforeAll
     public void setUpSession(){
@@ -30,24 +28,23 @@ public class DDTests {
     }
 
     @AfterEach
+    @DisplayName("Удаление бронирования")
     public void deleteBooking(){
-        ManageBooking.deleteBooking(bookingid);
-        System.out.println("удалено бронирование " + bookingid);
+        ManageBooking.deleteBooking(responseBookingDto);
     }
 
     @ParameterizedTest
+    @DisplayName("Параметризированный теест создания бронирования, валидация полей")
     @MethodSource("bookingSource")
     public void createBookingParameterizedTest(Booking booking){
-        ResponseBody bookingBody = ManageBooking.createBooking(booking);
-        bookingid = bookingBody.jsonPath().get("bookingid");
-        System.out.println("создано бронирование " + bookingid);
-        Assertions.assertEquals(bookingBody.path("booking.firstname"), booking.getFirstname());
-        Assertions.assertEquals(bookingBody.path("booking.lastname"), booking.getLastname());
-        Assertions.assertEquals(bookingBody.path("booking.totalprice"), booking.getTotalprice());
-        Assertions.assertEquals(bookingBody.path("booking.depositpaid"), booking.getDepositpaid());
-        Assertions.assertEquals(bookingBody.path("booking.additionalneeds"), booking.getAdditionalneeds());
-        Assertions.assertEquals(bookingBody.path("booking.bookingdates.checkin"), booking.getBookingdates().getCheckin());
-        Assertions.assertEquals(bookingBody.path("booking.bookingdates.checkout"), booking.getBookingdates().getCheckout());
+        bookingCreate = bookingGenerator(1).get(0);
+        responseBookingDto = ManageBooking.createBooking(bookingCreate);
+        Assertions.assertEquals(bookingCreate.getFirstname(), responseBookingDto.getBooking().getFirstname());
+        Assertions.assertEquals(bookingCreate.getLastname(), responseBookingDto.getBooking().getLastname());
+        Assertions.assertEquals(bookingCreate.getTotalprice(), responseBookingDto.getBooking().getTotalprice());
+        Assertions.assertEquals(bookingCreate.getDepositpaid(), responseBookingDto.getBooking().getDepositpaid());
+        Assertions.assertEquals(bookingCreate.getBookingdates().getCheckin(), responseBookingDto.getBooking().getBookingdates().getCheckin());
+        Assertions.assertEquals(bookingCreate.getBookingdates().getCheckout(), responseBookingDto.getBooking().getBookingdates().getCheckout());
     }
 
     public static Stream<Arguments> bookingSource(){

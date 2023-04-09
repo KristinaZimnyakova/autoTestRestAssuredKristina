@@ -2,45 +2,44 @@ package services;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import io.restassured.response.ResponseBody;
-import io.restassured.specification.RequestSpecification;
 import models.Booking;
+import models.ResponseBookingDto;
 
 public class ManageBooking {
 
-    public static ResponseBody createBooking(Booking booking){
+    public static ResponseBookingDto createBooking(Booking booking){
         RestAssured.baseURI = LoginService.URL;
-        return (Response) LoginService.get().body(booking)
+        return  LoginService.get().body(booking)
                 .when().log().ifValidationFails().post("/booking")
-                .then().log().ifValidationFails().statusCode(200).extract().body();
+                .then().log().ifValidationFails().statusCode(200).extract().as(ResponseBookingDto.class);
     }
 
-    public static void deleteBooking(Integer bookingid){
+    public static void deleteBooking(ResponseBookingDto responseBookingDto){
         RestAssured.baseURI = LoginService.URL;
-        LoginService.get().when().pathParam("id", bookingid).log().ifValidationFails().delete("/booking/{id}")
+        LoginService.get().when().pathParam("id", responseBookingDto.getBookingid()).log().ifValidationFails().delete("/booking/{id}")
                 .then().statusCode(201);
-
     }
 
-    public static ResponseBody updateBooking(Booking booking, Integer bookingid){
+    public static Booking updateBooking(Booking booking, Integer bookingid){
         RestAssured.baseURI = LoginService.URL;
-        return (Response) LoginService.get().body(booking)
+        return LoginService.get().body(booking)
                 .when().log().ifValidationFails().pathParam("id", bookingid).put("/booking/{id}")
-                .then().log().ifValidationFails().statusCode(200).extract().body();
+                .then().log().ifValidationFails().statusCode(200).extract().as(Booking.class);
     }
 
-    public static ResponseBody getBooking(Integer bookingid){
+    public static Booking getBooking(Integer bookingid){
         RestAssured.baseURI = LoginService.URL;
-        return (Response) LoginService.get()
+        return LoginService.get()
                 .when().log().ifValidationFails().pathParam("id", bookingid).get("/booking/{id}")
-                .then().log().ifValidationFails().statusCode(200).extract().body();
+                .then().log().ifValidationFails().statusCode(200).extract().as(Booking.class);
     }
 
-    public static ResponseBody getAllBookings(){
+    public static Response getAllBookings(){
         RestAssured.baseURI = LoginService.URL;
-        return (Response) LoginService.get()
+        return LoginService.get()
                 .when().log().ifValidationFails().get("/booking")
-                .then().log().ifValidationFails().statusCode(200).extract().body();
+                .then().log().ifValidationFails().statusCode(200).extract().response();
+
     }
 
 }

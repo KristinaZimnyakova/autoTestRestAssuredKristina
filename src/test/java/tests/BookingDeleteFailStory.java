@@ -1,22 +1,22 @@
 package tests;
 
 import io.restassured.RestAssured;
-import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 import models.Booking;
+import models.ResponseBookingDto;
 import org.junit.jupiter.api.*;
 import services.LoginService;
 import services.ManageBooking;
 
-import java.util.List;
-
 import static dataMethods.BookingGenerator.bookingGenerator;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("Неуспешное удаление")
 public class BookingDeleteFailStory {
 
     RequestSpecification session;
-    Integer bookingid;
+    Booking booking;
+    ResponseBookingDto responseBookingDto;
 
     @BeforeAll
     public void setUpSession(){
@@ -25,18 +25,17 @@ public class BookingDeleteFailStory {
 
     @BeforeEach
     public void createBooking(){
-        bookingid = ManageBooking.createBooking(bookingGenerator(1).get(0)).jsonPath().get("bookingid");
-        System.out.println("создано бронирование " + bookingid);
-        ManageBooking.deleteBooking(bookingid);
-        System.out.println("удалено бронирование " + bookingid);
+        booking = bookingGenerator(1).get(0);
+        responseBookingDto = ManageBooking.createBooking(booking);
+        ManageBooking.deleteBooking(responseBookingDto);
     }
 
     @Test
-    //повторное удаление ранее удаленного бронирования
+    @DisplayName("Повторное удаление ранее удаленного бронирования")
     public void deleteNonExistentBooking(){
         RestAssured.baseURI = LoginService.URL;
-        String response = session.when().log().ifValidationFails().delete("/booking/" + bookingid)
-                .then().statusCode(405).extract().body().asString();
+        String response = session.when().log().ifValidationFails().pathParam("id", responseBookingDto.getBookingid())
+                        .delete("/booking/{id}").then().statusCode(405).extract().body().asString();
         Assertions.assertEquals("Method Not Allowed", response);
     }
 
